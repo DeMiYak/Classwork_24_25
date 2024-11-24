@@ -22,11 +22,12 @@ constexpr int nod(int x, int y) {
     return x == 0 ? y : x > y ? nod(x%y, y) : nod(y%x, x);
 }
 
-
+/// является простым
 constexpr bool isPrime(int x, int y = 2) {
     return x == 1 ? false : x / y < 2 ? true : x % y == 0 ? false : isPrime(x, ++y);
 }
 
+/// k-ое простое число
 constexpr int kPrime(int k, int x = 2) {
     return k == 1 ? x : isPrime(++x) ? kPrime(--k, x) : kPrime(k, x);
 }
