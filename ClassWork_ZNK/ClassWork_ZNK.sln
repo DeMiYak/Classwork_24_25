@@ -5,6 +5,8 @@ VisualStudioVersion = 17.9.34622.214
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ClassWork_ZNK", "ClassWork_ZNK.vcxproj", "{81C0B14E-66BB-4A76-B716-175EDE37384A}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IO_hometask", "..\..\IO_hometask\IO_hometask.vcxproj", "{473F1EC9-64FF-4663-9F78-A7C538429CC1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,14 @@ Global
 		{81C0B14E-66BB-4A76-B716-175EDE37384A}.Release|x64.Build.0 = Release|x64
 		{81C0B14E-66BB-4A76-B716-175EDE37384A}.Release|x86.ActiveCfg = Release|Win32
 		{81C0B14E-66BB-4A76-B716-175EDE37384A}.Release|x86.Build.0 = Release|Win32
+		{473F1EC9-64FF-4663-9F78-A7C538429CC1}.Debug|x64.ActiveCfg = Debug|x64
+		{473F1EC9-64FF-4663-9F78-A7C538429CC1}.Debug|x64.Build.0 = Debug|x64
+		{473F1EC9-64FF-4663-9F78-A7C538429CC1}.Debug|x86.ActiveCfg = Debug|Win32
+		{473F1EC9-64FF-4663-9F78-A7C538429CC1}.Debug|x86.Build.0 = Debug|Win32
+		{473F1EC9-64FF-4663-9F78-A7C538429CC1}.Release|x64.ActiveCfg = Release|x64
+		{473F1EC9-64FF-4663-9F78-A7C538429CC1}.Release|x64.Build.0 = Release|x64
+		{473F1EC9-64FF-4663-9F78-A7C538429CC1}.Release|x86.ActiveCfg = Release|Win32
+		{473F1EC9-64FF-4663-9F78-A7C538429CC1}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
