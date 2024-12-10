@@ -6,6 +6,7 @@
 #include<vector>
 #include<sstream>
 #include<fstream>
+#include<iomanip>
 
 using namespace std;
 
@@ -25,6 +26,12 @@ private:
     void DataParsing(ifstream& in, vector<vector<double>>& data);
     string filename;
     char delim;
+
+    /// <summary>
+    /// Индекс ошибки (номер строки и столбца)
+    /// </summary>
+    pair<int, int> errorIndex;
+    int headerSize;
 };
 
 

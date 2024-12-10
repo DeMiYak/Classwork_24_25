@@ -1,25 +1,28 @@
 #include "Parser.h"
 
+/// Комментарии Никиты Константиновича:
+/// 
+/// Три великих поправки:
+/// 1. Проверка на то, что в строке количество значений отличается от количества столбцов.
+/// 2. В тексте исключения нужно запомнить, в какой строке / столбце была ошибка.
+/// 3. Хотя бы одна ошибка должна вести к отмене всего парсинга.
+/// 
+/// Давайте вынесем try... catch блоки из Parser.cpp и попробуем поймать std::exception в районе 44 строки в IO_hometask.cpp
+/// Не нужно на каждый throw делать try... catch блок.
+
+
 dataframe Parser::Parse()
 {
     ifstream in(filename);
-    try {
-        if (!in.is_open()) {
-            throw runtime_error("File not found: " + filename);
-        }
-    }
-    catch (const runtime_error& e) {
-        cout << e.what() << endl;
-        return dataframe();
+    if (!in.is_open()) {
+        throw runtime_error("File not found: " + filename);
     }
     vector<string> headers;
     vector<vector<double>> data;
-
+    errorIndex = { 1, 1 };
+    headerSize = 0;
     HeaderParsing(in, headers);
     DataParsing(in, data);
-
-    cout << endl;
-
     return make_pair(headers, data);
 }
 
@@ -29,47 +32,53 @@ void Parser::HeaderParsing(ifstream& in, vector<string>& headers)
     getline(in, vs);
     istringstream iss(vs);
     while (getline(iss, vs, delim)) {
-        try {
-            if (vs == "") {
-                //vs = "col" + to_string(count);
-                throw invalid_argument("Column name unidentified in file: " + filename);
-            }
-        }
-        catch (const invalid_argument& e) {
-            cout << '\n' << e.what() << endl;
-            return;
-        }
+        if (vs == "") {
+            //vs = "col" + to_string(count);
+            headers.clear();
+            throw invalid_argument("Column name is empty in file: " + filename + "\nError occurred at row "
+                + to_string(errorIndex.first) + " column " + to_string(errorIndex.second));
+        }  
+        errorIndex.second++;
         headers.push_back(vs);
-        cout << vs << ' ';
     }
-    cout << endl;
+    errorIndex.first++;
+    errorIndex.second = 1;
+    headerSize = headers.size();
 }
 
 void Parser::DataParsing(ifstream& in, vector<vector<double>>& data)
 {
     string vs;
-    int count = 0;
     while (getline(in, vs)) {
+        int count = 0;
         vector<double> values;
         istringstream iss(vs);
         double val;
-        try {
-            while (iss >> val) {
-                cout << val << ' ';
-                values.push_back(val);
-                if (iss.peek() == delim) {
-                    iss.ignore();
-                }
+        while (iss >> val) {
+            count++;
+            values.push_back(val);
+            if (iss.peek() == delim) {
+                iss.ignore();
             }
-            if (!iss.eof() && iss.fail()) {
-                throw invalid_argument("Failed to read the data from file. Type is not double: " + filename);
+            if (count > headerSize) {
+                break;
             }
+            errorIndex.second++;
         }
-        catch (const invalid_argument& e) {
-            cout << e.what() << '\n';
-            return;
+        if (!iss.eof() && iss.fail()) {
+            data.clear();
+            throw invalid_argument("Failed to read the data from file: " + filename + "\nError occurred at row " 
+                + to_string(errorIndex.first) + " column " + to_string(errorIndex.second));
         }
-        cout << endl;
+        if (count != headerSize) {
+            data.clear();
+            throw length_error("Error: incoherent header and data column sizes. Header "
+                + to_string(headerSize) + " columns and Data " + to_string(count) + " columns" 
+                + "\nError occurred at row "
+                + to_string(errorIndex.first) + " column " + to_string(errorIndex.second));
+        }
+        errorIndex.first++;
+        errorIndex.second = 1;
         data.push_back(values);
     }
 }
