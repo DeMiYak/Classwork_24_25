@@ -1,8 +1,11 @@
 #include "TextCorrector.h"
 
+enum LEVENSTEIN{DEL = 0, INS = 1, REP = 2};
+
 void TextCorrector::CorrectText(vector<string>& parsedText)
 {
     ResetInfo();
+    ofstream os("data//output.txt");
     // Convert to lowercase
     transform(parsedText.begin(), parsedText.end(), parsedText.begin(),
         [](std::string& str) {
@@ -12,13 +15,16 @@ void TextCorrector::CorrectText(vector<string>& parsedText)
 
     for (size_t i = 0; i < parsedText.size(); i++) {
         string& word(parsedText[i]);
-        if (!dict.contains(word)) {
+        // Обработать случай с спецсимволами. 
+        if (!IsInDelimiter(word) && !dict.contains(word)) {
             Correction(word);
         }
         else {
             info.contained++;
         }
+        os << word;
     }
+    os.close();
 }
 
 void TextCorrector::PrintInfo()
@@ -77,17 +83,13 @@ void TextCorrector::LevensteinReplace(string& correctable)
 {
     const string word_base(correctable);
     string temp_word;
+    vector<pair<string, LEVENSTEIN>> options;
     // Deletions
     for (size_t i = 0; i < correctable.size(); i++) {
         temp_word = word_base;
         temp_word.erase(i, 1);
         if (dict.find(temp_word) != dict.end()) {
-            cout << endl << "Deletion of letter \"" + word_base.substr(i, 1) +
-                "\" at position " + to_string(i) + "\nOld word : "
-                + correctable + "\tNew word: " + temp_word << endl;
-            correctable = temp_word;
-            info.deletion++;
-            return;
+            options.push_back(make_pair(temp_word, DEL));
         }
     }
     // Insertions
@@ -96,12 +98,7 @@ void TextCorrector::LevensteinReplace(string& correctable)
             temp_word = word_base;
             temp_word.insert(i, 1, c);
             if (dict.find(temp_word) != dict.end()) {
-                cout << endl << "Insertion of letter \"" + string(1, c)
-                    + "\" at position " + to_string(i) + "\nOld word: "
-                    + correctable + "\tNew word: " + temp_word << endl;
-                correctable = temp_word;
-                info.insertion++;
-                return;
+                options.push_back(make_pair(temp_word, INS));
             }
         }
     }
@@ -111,17 +108,75 @@ void TextCorrector::LevensteinReplace(string& correctable)
             temp_word = word_base;
             temp_word[i] = c;
             if (dict.find(temp_word) != dict.end()) {
-                cout << endl << "Replacement of letter \"" + word_base.substr(i, 1) + "\" with \""
-                    + string(1, c) + "\" at position " + to_string(i) + "\nOld word: "
-                    + correctable + "\tNew word: " + temp_word << endl;
-                correctable = temp_word;
-                info.replace++;
-                return;
+                options.push_back(make_pair(temp_word, REP));
             }
         }
     }
 
-    cout << endl << "No word of Levenstein distance 1 was found. Adding it to dictionary." << endl;
-    dict.emplace(correctable);
-    info.emplace++;
+    size_t optionSize(options.size());
+    int num = -1;
+    if (!options.empty()) {
+        do {
+            cout << endl << "Selection of words of Levenstein distance 1: ";
+            for (size_t i = 0; i < optionSize; ++i) {
+                cout << "(" << options[i].first << ", " << i << ")\t";
+            }
+            cout << endl << "To choose, enter the number next to word in ()." << endl;
+            cin >> num;
+            if (cin.fail()) {
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            }
+        } while (num < 0 || optionSize <= num);
+
+        cout << endl << "Selection of words of Levenstein distance 1: ";
+        for (size_t i = 0; i < options.size(); ++i) {
+            cout << "(" << options[i].first << ", " << i << ")\t";
+        }
+    }
+
+    if (!options.empty()) {
+        stringstream optionstream;
+        string new_word = options[num].first;
+        switch (options[num].second)
+        {
+            case DEL:
+                optionstream << endl << "Levenstein Deletion\nOld word : "
+                    << correctable << "\tNew word: " << new_word << endl;
+                ++info.deletion;
+                break;
+            case INS:
+                optionstream << endl << "Levenstein Insertion\nOld word : "
+                    << correctable << "\tNew word: " << new_word << endl;
+                ++info.insertion;
+                break;
+            case REP:
+                optionstream << endl << "Levenstein Replace\nOld word : "
+                    << correctable << "\tNew word: " << new_word << endl;
+                ++info.replace;
+                break;
+            default:
+                break;
+        }
+        correctable = new_word;
+        cout << optionstream.str();
+    }
+    else {
+        cout << endl << "No word of Levenstein distance 1 was found. Adding it to dictionary." << endl;
+        dict.emplace(correctable);
+        info.emplace++;
+    }
+}
+
+bool TextCorrector::IsInDelimiter(const string& word) const
+{
+    if (word.empty()) {
+        return true;
+    }
+    for (char c : word) {
+        if (delim.find(c) != string_view::npos) {
+            return true;
+        }
+    }
+    return false;
 }

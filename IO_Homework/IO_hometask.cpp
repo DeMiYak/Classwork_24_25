@@ -1,4 +1,6 @@
-﻿#include"Parser.h"
+﻿/// Доделать I/O и Словарь
+
+#include"Parser.h"
 #include"stdexcept"
 using namespace std;
 
@@ -38,7 +40,9 @@ int main()
         if (select == 5) {
             return 0;
         }
-        filename = beg + to_string(select) + fin;
+        stringstream filestream;
+        filestream >> beg >> select >> fin;
+        filename = filestream.str();
         cout << endl;
         Parser parse(filename);
         try {
@@ -53,6 +57,9 @@ int main()
         }
         catch (const length_error& e) {
             cout << '\n' << "Length Error: " << e.what() << endl;
+        }
+        catch (const exception& e) {
+            cout << '\n' << "Unable to identify error: " << e.what() << endl;
         }
     } while (true);
     return 0;

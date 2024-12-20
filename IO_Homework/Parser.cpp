@@ -31,12 +31,13 @@ void Parser::HeaderParsing(ifstream& in, vector<string>& headers)
     string vs;
     getline(in, vs);
     istringstream iss(vs);
+    stringstream errorStream;
     while (getline(iss, vs, delim)) {
         if (vs == "") {
-            //vs = "col" + to_string(count);
             headers.clear();
-            throw invalid_argument("Column name is empty in file: " + filename + "\nError occurred at row "
-                + to_string(errorIndex.first) + " column " + to_string(errorIndex.second));
+            errorStream << "Column name is empty in file: " << filename << "\nError occurred at row "
+                << errorIndex.first << " column " << errorIndex.second;
+            throw invalid_argument(errorStream.str());
         }  
         errorIndex.second++;
         headers.push_back(vs);
@@ -49,6 +50,7 @@ void Parser::HeaderParsing(ifstream& in, vector<string>& headers)
 void Parser::DataParsing(ifstream& in, vector<vector<double>>& data)
 {
     string vs;
+    stringstream errorStream;
     while (getline(in, vs)) {
         int count = 0;
         vector<double> values;
@@ -67,15 +69,17 @@ void Parser::DataParsing(ifstream& in, vector<vector<double>>& data)
         }
         if (!iss.eof() && iss.fail()) {
             data.clear();
-            throw invalid_argument("Failed to read the data from file: " + filename + "\nError occurred at row " 
-                + to_string(errorIndex.first) + " column " + to_string(errorIndex.second));
+            errorStream << "Failed to read the data from file: " << filename << "\nError occurred at row "
+                << errorIndex.first << " column " << errorIndex.second;
+            throw invalid_argument(errorStream.str());
         }
         if (count != headerSize) {
             data.clear();
-            throw length_error("Error: incoherent header and data column sizes. Header "
-                + to_string(headerSize) + " columns and Data " + to_string(count) + " columns" 
-                + "\nError occurred at row "
-                + to_string(errorIndex.first) + " column " + to_string(errorIndex.second));
+            errorStream << "Error: incoherent header and data column sizes. Header "
+                << headerSize << " columns and Data " << count << " columns"
+                << "\nError occurred at row "
+                << errorIndex.first << " column " << errorIndex.second;
+            throw length_error(errorStream.str());
         }
         errorIndex.first++;
         errorIndex.second = 1;

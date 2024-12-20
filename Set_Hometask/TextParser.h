@@ -16,7 +16,7 @@ class TextParser
 {
 public:
 	TextParser(string_view delim) : delim(delim) {};
-	vector<string> Parse(const string& filename);
+	vector<string> Parse(const string& filename, bool addDelimiters = false);
 	void SetDelim(const string_view& _delim) { delim = _delim; }
 	string_view GetDelim() const { return delim; }
 private:
